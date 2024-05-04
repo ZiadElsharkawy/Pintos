@@ -17,7 +17,7 @@
 #include "threads/palloc.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
-//hn3ml implement ll excute system call --ziad
+//hn3ml implement ll excute system call
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
 
@@ -88,6 +88,11 @@ start_process (void *file_name_)
 int
 process_wait (tid_t child_tid UNUSED) 
 {
+  while (true)
+  {
+thread_yield();
+  }
+  
   return -1;
 }
 
@@ -437,7 +442,8 @@ setup_stack (void **esp)
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success)
-        *esp = PHYS_BASE;
+        // *esp = PHYS_BASE;
+      *esp = PHYS_BASE - 12;
       else
         palloc_free_page (kpage);
     }

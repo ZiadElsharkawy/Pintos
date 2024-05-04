@@ -92,10 +92,10 @@ struct thread
    struct list_elem allelem;  /* List element for all threads list. */
    struct list_elem readyelem;
    int donated_priority;                /*temporary variable to save the actual priority.*/
-   bool donate;
+   bool donee;
    struct list donate_list;
    struct list_elem donateelem;
-   struct lock *wait_lock;
+   struct lock *holding_lock;
    int nested_depth;  
 
    int wakeup_ticks;
@@ -146,17 +146,14 @@ void thread_foreach(thread_action_func *, void *);
 int thread_get_priority(void);
 void thread_set_priority(int);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-bool minWakeUpComparison(const struct list_elem *, const struct list_elem *, void *);
-
 int thread_get_nice(void);
 void thread_set_nice(int);
 int thread_get_recent_cpu(void);
 int thread_get_load_avg(void);
 
-bool higher_priority_ready( struct list_elem *a, struct list_elem *b, void *aux UNUSED);
-bool higher_priority( struct list_elem *a,  struct list_elem *b, void *aux UNUSED);
-bool higher_priority_donate( struct list_elem *a, struct list_elem *b, void *aux UNUSED);
+bool ready_thread_compare_priority( struct list_elem *a, struct list_elem *b, void *aux UNUSED);
+bool donate_thread_compare_priority( struct list_elem *a, struct list_elem *b, void *aux UNUSED);
+bool waiting_thread_compare_priority( struct list_elem *a, struct list_elem *b, void *aux UNUSED);
 
 void updatePriorities(int64_t ticks, struct thread *t);
 
@@ -165,5 +162,4 @@ void calc_load_avg(void);
 void calc_recent_cpu(struct thread *t);
 void calc_priority(struct thread *t);
 bool less_func(struct list_elem *first, struct list_elem *second, void *aux);
-bool compare_priority(struct list_elem *first, struct list_elem *second, void *aux);
 #endif /* threads/thread.h */

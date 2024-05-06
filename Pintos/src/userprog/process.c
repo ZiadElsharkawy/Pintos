@@ -102,7 +102,12 @@ process_exit (void)
 {
   struct thread *cur = thread_current ();
   uint32_t *pd;
+  /* Set exit status */
+  cur->exit_status = status;
 
+  /* Notify parent process if it's waiting */
+  if (cur->parent != NULL)
+    sema_up (&cur->parent->child_sema);
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
   pd = cur->pagedir;

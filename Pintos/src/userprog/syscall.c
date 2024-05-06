@@ -22,7 +22,7 @@ syscall_handler(struct intr_frame *f ) // 1.halt 2.exit 3.exec 4.wait 5.create 6
      halt();
      break;
    } else if (syscall == SYS_EXIT){
-    syscall_exit(*(int *)(f->esp + 3));
+            exit(*(int *)(f->esp + 3));
             break;
    }else if (syscall == SYS_EXEC){
 
@@ -61,15 +61,10 @@ halt (void)
 //  a status of 0 indicates success and nonzero values indicate errors.
 void exit (int status)
 {
-    struct child_status *child;
      struct thread *cur = thread_current ();
        printf ("%s: exit(%d)\n", cur->name, status);
-
-
-
+       process_exit(status);
+   
 thread_exit();
 }
-void syscall_exit(int status) {
-    // Perform cleanup tasks for the current process
-    process_exit(status);
-}
+

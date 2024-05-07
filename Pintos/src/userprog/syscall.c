@@ -23,7 +23,7 @@ syscall_handler(struct intr_frame *f ) // 1.halt 2.exit 3.exec 4.wait 5.create 6
      halt();
      break;
    } else if (syscall == SYS_EXIT){
-            exit(*(int *)(f->esp + 3));
+            exit(*(int *)(f->esp + 4));
             break;
    }else if (syscall == SYS_EXEC) {
     pid_t child_pid = exec((char *)(f->esp + 4));
@@ -31,27 +31,28 @@ syscall_handler(struct intr_frame *f ) // 1.halt 2.exit 3.exec 4.wait 5.create 6
     break;
 }
   else if (syscall == SYS_WAIT){
+    int status = process_wait((int *)(f->esp + 4));
+    f->eax = status;
+  }
+  // else if (syscall == SYS_CREATE){
 
-  }else if (syscall == SYS_CREATE){
+  // }else if (syscall == SYS_REMOVE){
 
-  }else if (syscall == SYS_REMOVE){
+  // }else if (syscall == SY_OPEN){
+  // }else if (syscall == SYS_FILESIZE){
+  //  }else if (syscall == SYS_READ){
 
-  }else if (syscall == SY_OPEN){
-  }else if (syscall == SYS_FILESIZE){
-   }else if (syscall == SYS_READ){
-
-  }else if (syscall == SYS_WRITE){
-    ()sp;
+  // }else if (syscall == SYS_WRITE){
+  //   ()sp;
     
-      file_write()
-   }else if (syscall == SYS_SEEK){
+  //     file_write()
+  //  }else if (syscall == SYS_SEEK){
 
-  }else if (syscall == SYS_TELL){
+  // }else if (syscall == SYS_TELL){
 
-   }else if (syscall == SYS_CLOSE){
+  //  }else if (syscall == SYS_CLOSE){
 
-   }
-    handle_exit();
+  //  }
 
 }
 void

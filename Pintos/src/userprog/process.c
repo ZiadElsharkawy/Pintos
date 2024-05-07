@@ -85,15 +85,32 @@ start_process (void *file_name_)
 
    This function will be implemented in problem 2-2.  For now, it
    does nothing. */
-int
-process_wait (tid_t child_tid UNUSED) 
-{
-  while (true)
-  {
-thread_yield();
-  }
-  
-  return -1;
+//pid for process -> user level ,tid -> kernel level
+int process_wait(tid_t child_tid) {
+    struct thread *cur = thread_current();
+    struct list_elem *e;
+    bool child_found = false;
+    
+    // Iterate over the list of child threads
+    for (e = list_begin(&cur->child_threads); e != list_end(&cur->child_threads); e = list_next(e)) {
+        struct child_thread *child = list_entry(e, struct child_thread, elem.next);
+        if (child->tid == child_tid) {
+            child_found = true;
+            if (!child->exited) {
+                // Wait for the child thread to exit
+                sema_down(&child->exit_sema);
+            }
+            int exit_status = child->exit_status;
+            list_remove(e); // Remove child from the list
+            free(child); // Free memory allocated for child thread
+            return exit_status; // Return child's exit status
+        }
+    }
+    
+    if (!child_found) {
+        // Child thread with specified tid not found
+        return -1;
+    }
 }
 
 /* Free the current process's resources. */

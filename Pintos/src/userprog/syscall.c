@@ -7,6 +7,7 @@
 void syscall_exit(int status);
 void syscall_halt(void);
 static void syscall_handler(struct intr_frame *);
+static pid_t exec (const char *);
 
 void syscall_init(void)
 {
@@ -24,9 +25,12 @@ syscall_handler(struct intr_frame *f ) // 1.halt 2.exit 3.exec 4.wait 5.create 6
    } else if (syscall == SYS_EXIT){
             exit(*(int *)(f->esp + 3));
             break;
-   }else if (syscall == SYS_EXEC){
-
-   }else if (syscall == SYS_WAIT){
+   }else if (syscall == SYS_EXEC) {
+    pid_t child_pid = exec((char *)(f->esp + 4));
+    f->eax = child_pid;
+    break;
+}
+  else if (syscall == SYS_WAIT){
 
   }else if (syscall == SYS_CREATE){
 
@@ -67,4 +71,27 @@ void exit (int status)
    
 thread_exit();
 }
+pid_t
+exec(const char *cmd_line)
+{
+    // Check if cmd_line is a valid  pointer
+    if (!is_user_vaddr(cmd_line) || cmd_line == NULL || !is_user_vaddr(cmd_line + strlen(cmd_line)))
+        return -1;
 
+    // Initialize a semaphore to synchronize between parent and child
+    struct semaphore exec_sema;
+    sema_init(&exec_sema, 0);
+
+    // Execute the process and pass the semaphore to process_execute
+    pid_t child_pid = process_execute(cmd_line, &exec_sema);
+
+    // Wait for the child to load the executable
+    sema_down(&exec_sema);
+
+    // If child_pid is still less than 0, process_execute failed
+    if (child_pid < 0)
+        return -1;
+
+    // Return the child process's pid
+    return child_pid;
+}
